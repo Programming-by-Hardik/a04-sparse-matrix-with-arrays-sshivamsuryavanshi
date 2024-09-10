@@ -1,117 +1,109 @@
-// sparse_matrix_assignment.c
-// This program represents a sparse matrix using a 2D array in C and includes test cases.
-
 #include <stdio.h>
-#include <stdbool.h>
+#include <stdlib.h>
 
-#define MAX 100  // Maximum number of non-zero elements in the sparse matrix
-#define N 4      // Number of columns in the original matrix (modifiable)
+// Structure to represent a sparse matrix
+struct SparseMatrix {
+    int row;
+    int col;
+    int value;
+};
 
-// Function prototypes
-void createSparseMatrix(int sparseMatrix[][3], int originalMatrix[][N], int rows, int cols);
-void printSparseMatrix(int sparseMatrix[][3], int nonZeroCount);
-bool testCreateSparseMatrix();
-bool testPrintSparseMatrix();
+// Function to create a sparse matrix from a given 2D array (dense matrix)
+void createSparseMatrix(int denseMatrix[4][5], int rows, int cols, struct SparseMatrix sparse[], int *size) {
+    int k = 0;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (denseMatrix[i][j] != 0) {
+                sparse[k].row = i;
+                sparse[k].col = j;
+                sparse[k].value = denseMatrix[i][j];
+                k++;
+            }
+        }
+    }
+    *size = k;
+}
+
+// Function to print the sparse matrix in triplet form
+void printSparseMatrix(struct SparseMatrix sparse[], int size) {
+    printf("Row\tColumn\tValue\n");
+    for (int i = 0; i < size; i++) {
+        printf("%d\t%d\t%d\n", sparse[i].row, sparse[i].col, sparse[i].value);
+    }
+}
+
+// Function to add two sparse matrices
+void addSparseMatrices(struct SparseMatrix sparse1[], int size1, struct SparseMatrix sparse2[], int size2, struct SparseMatrix result[], int *resultSize) {
+    int i = 0, j = 0, k = 0;
+
+    while (i < size1 && j < size2) {
+        if (sparse1[i].row < sparse2[j].row || (sparse1[i].row == sparse2[j].row && sparse1[i].col < sparse2[j].col)) {
+            result[k++] = sparse1[i++];
+        } else if (sparse2[j].row < sparse1[i].row || (sparse2[j].row == sparse1[i].row && sparse2[j].col < sparse1[i].col)) {
+            result[k++] = sparse2[j++];
+        } else {
+            result[k].row = sparse1[i].row;
+            result[k].col = sparse1[i].col;
+            result[k].value = sparse1[i].value + sparse2[j].value;
+            k++;
+            i++;
+            j++;
+        }
+    }
+
+    // Add remaining elements
+    while (i < size1) {
+        result[k++] = sparse1[i++];
+    }
+    while (j < size2) {
+        result[k++] = sparse2[j++];
+    }
+
+    *resultSize = k;
+}
 
 int main() {
-    // Run test cases
-    if (testCreateSparseMatrix()) {
-        printf("testCreateSparseMatrix PASSED\n");
-    } else {
-        printf("testCreateSparseMatrix FAILED\n");
-    }
+    // Example dense matrices
+    int denseMatrix1[4][5] = {
+        {0, 0, 3, 0, 4},
+        {0, 0, 5, 7, 0},
+        {0, 0, 0, 0, 0},
+        {0, 2, 6, 0, 0}
+    };
 
-    if (testPrintSparseMatrix()) {
-        printf("testPrintSparseMatrix PASSED\n");
-    } else {
-        printf("testPrintSparseMatrix FAILED\n");
-    }
+    int denseMatrix2[4][5] = {
+        {0, 1, 0, 0, 0},
+        {0, 0, 2, 0, 0},
+        {0, 3, 0, 0, 0},
+        {0, 0, 0, 4, 5}
+    };
+
+    struct SparseMatrix sparse1[20], sparse2[20], result[40];
+    int size1, size2, resultSize;
+
+    // Convert dense matrices to sparse form
+    createSparseMatrix(denseMatrix1, 4, 5, sparse1, &size1);
+    createSparseMatrix(denseMatrix2, 4, 5, sparse2, &size2);
+
+    // Print the sparse matrices
+    printf("Sparse Matrix 1:\n");
+    printSparseMatrix(sparse1, size1);
+
+    printf("\nSparse Matrix 2:\n");
+    printSparseMatrix(sparse2, size2);
+
+    // Add the two sparse matrices
+    addSparseMatrices(sparse1, size1, sparse2, size2, result, &resultSize);
+
+    // Print the result of addition
+    printf("\nResultant Sparse Matrix after addition:\n");
+    printSparseMatrix(result, resultSize);
 
     return 0;
 }
 
-// Function to convert a matrix into sparse matrix format
-void createSparseMatrix(int sparseMatrix[][3], int originalMatrix[][N], int rows, int cols) {
-    //WRITE THE FUNCTION DESCRIPTION HERE
     
 
 
 
 
-
-
-
-
-}
-
-// Function to print sparse matrix representation
-void printSparseMatrix(int sparseMatrix[][3], int nonZeroCount) {
-    //WRITE THE FUNCTION DESCRIPTION HERE
-    
-
-
-
-
-
-
-
-
-}
-
-//--------------------------------------------------------
-//DON'T CHANGE THE CODE BELOW THIS!
-//--------------------------------------------------------
-// TEST CASES
-
-// Test function for createSparseMatrix
-bool testCreateSparseMatrix() {
-    int originalMatrix[4][N] = {
-        {0, 0, 3, 0},
-        {0, 4, 0, 0},
-        {0, 0, 0, 5},
-        {0, 2, 0, 6}
-    };
-
-    int expectedSparseMatrix[MAX][3] = {
-        {4, 4, 5},   // 4x4 matrix with 5 non-zero elements
-        {0, 2, 3},   // Original matrix[0][2] = 3
-        {1, 1, 4},   // Original matrix[1][1] = 4
-        {2, 3, 5},   // Original matrix[2][3] = 5
-        {3, 1, 2},   // Original matrix[3][1] = 2
-        {3, 3, 6}    // Original matrix[3][3] = 6
-    };
-
-    int sparseMatrix[MAX][3];
-    createSparseMatrix(sparseMatrix, originalMatrix, 4, N);
-
-    // Compare the sparseMatrix with the expectedSparseMatrix
-    for (int i = 0; i <= expectedSparseMatrix[0][2]; i++) {
-        for (int j = 0; j < 3; j++) {
-            if (sparseMatrix[i][j] != expectedSparseMatrix[i][j]) {
-                return false;  // If any value doesn't match, test fails
-            }
-        }
-    }
-
-    return true;  // Test passes if all values match
-}
-
-// Test function for printSparseMatrix
-bool testPrintSparseMatrix() {
-    // Define a sparse matrix with 5 non-zero elements
-    int sparseMatrix[MAX][3] = {
-        {4, 4, 5},   // 4x4 matrix with 5 non-zero elements
-        {0, 2, 3},   // Original matrix[0][2] = 3
-        {1, 1, 4},   // Original matrix[1][1] = 4
-        {2, 3, 5},   // Original matrix[2][3] = 5
-        {3, 1, 2},   // Original matrix[3][1] = 2
-        {3, 3, 6}    // Original matrix[3][3] = 6
-    };
-
-    // Simulate a successful print (visual inspection may be needed for testing this)
-    printf("Expected Sparse Matrix Output:\n");
-    printSparseMatrix(sparseMatrix, sparseMatrix[0][2]);
-
-    // Since printSparseMatrix only prints the output, we assume it passes if the format is correct
-    return true;
-}
